@@ -26,7 +26,6 @@ if menu == "Signal Reading":
 
     if read_button:
         if uploaded_file is not None:
-            # First Task: Read the file content
             file_content = uploaded_file.read().decode("utf-8").splitlines()
 
             timeFlag = file_content[0]  # First line
@@ -54,7 +53,6 @@ if menu == "Signal Reading":
 elif menu == "Signal Generation":
     st.header("Signal Generation")
 
-
     signal_type = st.selectbox("Choose Signal Type", ["Sine Wave", "Cosine Wave"])
     amplitude = st.number_input("Amplitude (A)", min_value=0.0, value=1.0)
     phaseShift = st.number_input("Phase Shift (theta in radians)", min_value=0.0, value=0.0)
@@ -63,11 +61,7 @@ elif menu == "Signal Generation":
 
     generate_button = st.button("Generate Signal")
     if generate_button:
-        # Second Task: Assign the variables from user input
         sinFlag = signal_type == "Sine Wave"  # True for sine, False for cosine
-
-
-        # Check if sampling frequency satisfies the Nyquist criterion
         if samplingFreq < 2 * analogFreq:
             st.error("Sampling frequency must be at least twice the analog frequency .")
         else:
