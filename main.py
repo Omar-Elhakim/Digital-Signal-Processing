@@ -7,16 +7,16 @@ import streamlit as st
 def generate_signal(sineFlag, A, f, theta, fs):
     t = np.linspace(0, 1, int(fs))  # Corrected to generate based on sampling frequency
     if sineFlag:  # if sineFlag is True, then it's a sine wave
-        signal = A * np.sin(2 * np.pi * f * t + theta)
+        signal = A * np.sin(2 * 180 * f * t/fs + theta)
     else:
-        signal = A * np.cos(2 * np.pi * f * t + theta)
+        signal = A * np.cos(2 * 180 * f * t/fs + theta)
     return t, signal
 
 
 st.title("Signal Processing")
 
 st.sidebar.title("Menu")
-menu = st.sidebar.selectbox("Select an option", ["Signal Reading", "Signal Generation"])
+menu = st.sidebar.selectbox("Select an option", ["Signal Reading", "Signal Generation"], index=None)
 
 if menu == "Signal Reading":
     st.header("Read Signal Samples")
@@ -40,7 +40,7 @@ if menu == "Signal Reading":
                 amplitudes.append(float(values[1]))
 
             # Plotting continuous signal
-            figCont, axCont = plt.subplots(figsize=(10, 5))
+            figCont, axCont = plt.subplots(figsize=(50, 5))
             axCont.plot(indices, amplitudes)
             st.pyplot(figCont)  # continuous
 
@@ -55,7 +55,7 @@ elif menu == "Signal Generation":
 
     signal_type = st.selectbox("Choose Signal Type", ["Sine Wave", "Cosine Wave"])
     amplitude = st.number_input("Amplitude (A)", min_value=0.0, value=1.0)
-    phaseShift = st.number_input("Phase Shift (theta in radians)", min_value=0.0, value=0.0)
+    phaseShift = st.number_input("Phase Shift ", min_value=0.0, value=0.0)
     analogFreq = st.number_input("Analog Frequency (Hz)", min_value=0.0, value=1.0)
     samplingFreq = st.number_input("Sampling Frequency (Hz)", min_value=0.0, value=10.0)
 
@@ -82,3 +82,6 @@ elif menu == "Signal Generation":
             ax_disc.set_xlabel("Time (s)")
             ax_disc.set_ylabel("Amplitude")
             st.pyplot(fig_disc)
+
+else:
+    st.markdown("*Choose an option from the side menu!*")
