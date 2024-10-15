@@ -4,13 +4,16 @@ import streamlit as st
 
 
 def main():
-    st.title("Signal Processing")
+
+# Main page
+    st.title("Digital Signal Processing")
 
     st.sidebar.title("Menu")
     menu = st.sidebar.selectbox(
-        "Select an option", ["Signal Reading", "Signal Generation"], index=None
+        "Select an option", ["Arithmetic Operations", "Signal Reading", "Signal Generation"], index=None
     )
 
+# Read and draw a Signal from a file
     if menu == "Signal Reading":
         st.header("Read Signal Samples")
 
@@ -19,21 +22,10 @@ def main():
 
         if read_button:
             if uploaded_file is not None:
-                file_content = uploaded_file.read().decode("utf-8").splitlines()
-
-                timeFlag = file_content[0]  # First line
-                periodicFlag = file_content[1]  # Second line
-                nOfSamples = int(file_content[2])  # Third line
-
-                indices = []
-                amplitudes = []
-                for line in file_content[3 : 3 + nOfSamples]:
-                    values = line.strip().split(" ")
-                    indices.append(int(values[0]))
-                    amplitudes.append(float(values[1]))
-
+                indices ,amplitudes= readSignal(uploaded_file)
                 draw(indices, amplitudes)
 
+# Choose your inputs and generate the signal then draw it
     elif menu == "Signal Generation":
         st.header("Signal Generation")
 
@@ -58,9 +50,27 @@ def main():
                 )
                 draw(indices1, values1)
 
+    elif menu == "Signal Generation":
+            pass
+
     else:
         st.markdown("*Choose an option from the side menu!*")
 
+def readSignal(uploaded_file):
+    file_content = uploaded_file.read().decode("utf-8").splitlines()
+
+    # timeFlag = file_content[0]  # First line
+    # periodicFlag = file_content[1]  # Second line
+    nOfSamples = int(file_content[2])  # Third line
+
+    indices = []
+    amplitudes = []
+    for line in file_content[3 : 3 + nOfSamples]:
+        values = line.strip().split(" ")
+        indices.append(int(values[0]))
+        amplitudes.append(float(values[1]))
+        
+    return indices,amplitudes
 
 def draw(indices, amplitudes):
 
@@ -113,5 +123,36 @@ def generate_signal(sineFlag, A, f, fs, theta):
             signal.append(A * np.cos(2 * np.pi * f / fs * i + theta))
     return indices, signal
 
+def addSignals(firstSignalFile,secondSignalFile):
+    # Read the files
+    indices1,amplitudes1=readSignal(firstSignalFile)
+    indices2,amplitudes2=readSignal(secondSignalFile)
+    if len(indices1)!=len(indices2):
+        print('The two files must be the same size')
+        return
+    addedAmplitudes=list(x+y for x,y in zip(amplitudes1,amplitudes2))
+    draw(indices1,addedAmplitudes)
+    return indices1,addedAmplitudes
 
+def subtractSignals(firstSignalFile,secondSignalFile):
+    # Read the files
+    indices1,amplitudes1=readSignal(firstSignalFile)
+    indices2,amplitudes2=readSignal(secondSignalFile)
+    if len(indices1)!=len(indices2):
+        print('The two files must be the same size')
+        return
+    subtractedAmplitudes=list(x-y for x,y in zip(amplitudes1,amplitudes2))
+    draw(indices1,subtractedAmplitudes)
+    return indices1,subtractedAmplitudes
+
+def normalizeSignal0(signal):
+    max_value = max(np.abs(signal))
+    normalized_signal = list(x / max_value for x in signal)
+    return normalized_signal
+
+def normalize_signal1(signal):
+    min_val = min(signal)
+    max_val = max(signal)
+    signal = list((i - min_val) / (max_val - min_val) for i in signal)
+    return signal
 main()
