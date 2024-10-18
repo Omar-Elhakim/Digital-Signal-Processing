@@ -125,13 +125,19 @@ def main():
 
         # Display for Multiply button
         elif st.session_state["button_pressed"] == "button_3":
-            pass
-            # TODO apply the multiply signal function and use it here
+            uploaded_file = st.file_uploader(
+                "Upload the signal txt file", type="txt"
+            )
+            constant = st.number_input("Enter a constant", min_value=-1.0, value=1.0)
+            multiplySignals(uploaded_file, constant)
+
 
         # Display for Square button
         elif st.session_state["button_pressed"] == "button_4":
-            pass
-            # TODO apply the Square signal function and use it here
+            uploaded_file = st.file_uploader(
+                "Upload the signal txt file", type="txt"
+            )
+            squareSignals(uploaded_file)
 
         # Display for Shift button
         elif st.session_state["button_pressed"] == "button_5":
@@ -248,6 +254,32 @@ def subtractSignals(firstSignalFile, secondSignalFile):
     subtractedAmplitudes = list(x - y for x, y in zip(amplitudes1, amplitudes2))
     draw(indices1, subtractedAmplitudes)
     return indices1, subtractedAmplitudes
+
+
+def multiplySignals(uploaded_file, constant):
+    if uploaded_file is None:
+        st.error("Please upload a signal file before multiplying.")
+        return
+
+    # Read the file
+    indices, amplitudes = readSignal(uploaded_file)
+    # Multiply each amplitude by the constant
+    multipliedAmplitudes = [amp * constant for amp in amplitudes]
+    draw(indices, multipliedAmplitudes)
+    return indices, multipliedAmplitudes
+
+
+def squareSignals(uploaded_file):
+    if uploaded_file is None:
+        st.error("Please upload a signal file before squaring.")
+        return
+
+    # Read the file
+    indices, amplitudes = readSignal(uploaded_file)
+    # Square each amplitude
+    squaredAmplitudes = [amp ** 2 for amp in amplitudes]
+    draw(indices, squaredAmplitudes)
+    return indices, squaredAmplitudes
 
 
 def normalizeSignal0(signalFile):
