@@ -63,10 +63,9 @@ def main():
             sub,
             mult,
             square,
-            shift,
             norm,
             accum,
-        ) = st.columns([1, 1.5, 1.5, 1.2, 1, 1.5, 1.6])
+        ) = st.columns([1, 1.5, 1.5, 1.2, 1.5, 1.6])
 
         with add:
             if st.button("Add"):
@@ -83,10 +82,6 @@ def main():
         with square:
             if st.button("Square"):
                 st.session_state["button_pressed"] = "button_4"
-
-        with shift:
-            if st.button("Shift"):
-                st.session_state["button_pressed"] = "button_5"
 
         with norm:
             if st.button("Normalize"):
@@ -140,11 +135,6 @@ def main():
             )
             if uploaded_file:
                 squareSignals(uploaded_file)
-
-        # Display for Shift button
-        elif st.session_state["button_pressed"] == "button_5":
-            pass
-            # TODO apply the Square signal function and use it here
 
         # Display for Normalize button
         elif st.session_state["button_pressed"] == "button_6":
