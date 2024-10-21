@@ -104,7 +104,14 @@ def main():
             )
 
             if uploaded_file1 and uploaded_file2:
-                addSignals(uploaded_file1, uploaded_file2)
+                indecis,samples = addSignals(uploaded_file1, uploaded_file2)
+
+            comparingFile = st.file_uploader(
+                "Upload the signal compare txt file", type="txt"
+            )
+            if comparingFile and samples and indecis:
+                SignalSamplesAreEqual(comparingFile,indecis,samples)
+
 
         # Display for Sub button
         elif st.session_state["button_pressed"] == "button_2":
@@ -116,7 +123,14 @@ def main():
                 "Upload the second signal txt file", type="txt"
             )
             if uploaded_file1 and uploaded_file2:
-                subtractSignals(uploaded_file1, uploaded_file2)
+                indecis, samples = addSignals(uploaded_file1, uploaded_file2)
+
+            comparingFile = st.file_uploader(
+                "Upload the signal compare txt file", type="txt"
+            )
+            if comparingFile and samples and indecis:
+                SignalSamplesAreEqual(comparingFile, indecis, samples)
+
 
         # Display for Multiply button
         elif st.session_state["button_pressed"] == "button_3":
@@ -125,7 +139,12 @@ def main():
             )
             constant = st.number_input("Enter a constant", min_value=-1.0, value=1.0)
             if uploaded_file:
-                multiplySignals(uploaded_file, constant)
+                indecis, samples = multiplySignals(uploaded_file, constant)
+                comparingFile = st.file_uploader(
+                    "Upload the signal compare txt file", type="txt"
+                )
+                if comparingFile and samples and indecis:
+                    SignalSamplesAreEqual(comparingFile, indecis, samples)
 
 
         # Display for Square button
@@ -134,7 +153,12 @@ def main():
                 "Upload the signal txt file", type="txt"
             )
             if uploaded_file:
-                squareSignals(uploaded_file)
+                indecis, samples = squareSignals(uploaded_file)
+            comparingFile = st.file_uploader(
+                "Upload the signal compare txt file", type="txt"
+            )
+            if comparingFile and samples and indecis:
+                SignalSamplesAreEqual(comparingFile, indecis, samples)
 
         # Display for Normalize button
         elif st.session_state["button_pressed"] == "button_6":
@@ -142,15 +166,27 @@ def main():
             choice = st.radio("Normalize to:", ("[-1,1]", "[0,1]"), index=0)
             if uploaded_file:
                 if choice == "[-1,1]":
-                    normalizeSignal1(uploaded_file)
+                    indecis, samples = normalizeSignal1(uploaded_file)
                 else:
-                    normalizeSignal0(uploaded_file)
+                    indecis, samples = normalizeSignal0(uploaded_file)
+
+                comparingFile = st.file_uploader(
+                    "Upload the signal compare txt file", type="txt"
+                )
+                if comparingFile and samples and indecis:
+                    SignalSamplesAreEqual(comparingFile, indecis, samples)
 
         # Display for accumulate button
         elif st.session_state["button_pressed"] == "button_7":
             uploaded_file = st.file_uploader("Upload the signal txt file", type="txt")
             if uploaded_file:
-                accumulate(uploaded_file)
+                indecis, samples = accumulate(uploaded_file)
+
+            comparingFile = st.file_uploader(
+                "Upload the signal compare txt file", type="txt"
+            )
+            if comparingFile and samples and indecis:
+                SignalSamplesAreEqual(comparingFile, indecis, samples)
 
     else:
         st.markdown("*Choose an option from the side menu!*")
@@ -290,5 +326,19 @@ def accumulate(signalFile):
     draw(indices, signal)
     return signal
 
+
+def SignalSamplesAreEqual(compareFile, indices, samples):
+    expected_indices,expected_samples = readSignal(compareFile)
+
+    if len(expected_samples) != len(samples):
+        "Test case failed, your signal have different length from the expected one"
+        return
+    for i in range(len(expected_samples)):
+        if abs(samples[i] - expected_samples[i]) < 0.01:
+            continue
+        else:
+            "Test case failed, your signal have different values from the expected one"
+            return
+    "Test case passed successfully"
 
 main()
