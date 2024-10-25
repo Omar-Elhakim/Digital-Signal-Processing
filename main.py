@@ -104,14 +104,13 @@ def main():
             )
 
             if uploaded_file1 and uploaded_file2:
-                indecis,samples = addSignals(uploaded_file1, uploaded_file2)
+                indecis, samples = addSignals(uploaded_file1, uploaded_file2)
 
             comparingFile = st.file_uploader(
                 "Upload the signal compare txt file", type="txt"
             )
             if comparingFile and samples and indecis:
-                SignalSamplesAreEqual(comparingFile,indecis,samples)
-
+                SignalSamplesAreEqual(comparingFile, indecis, samples)
 
         # Display for Sub button
         elif st.session_state["button_pressed"] == "button_2":
@@ -123,7 +122,7 @@ def main():
                 "Upload the second signal txt file", type="txt"
             )
             if uploaded_file1 and uploaded_file2:
-                indecis, samples = addSignals(uploaded_file1, uploaded_file2)
+                indecis, samples = subtractSignals(uploaded_file1, uploaded_file2)
 
             comparingFile = st.file_uploader(
                 "Upload the signal compare txt file", type="txt"
@@ -131,12 +130,9 @@ def main():
             if comparingFile and samples and indecis:
                 SignalSamplesAreEqual(comparingFile, indecis, samples)
 
-
         # Display for Multiply button
         elif st.session_state["button_pressed"] == "button_3":
-            uploaded_file = st.file_uploader(
-                "Upload the signal txt file", type="txt"
-            )
+            uploaded_file = st.file_uploader("Upload the signal txt file", type="txt")
             constant = st.number_input("Enter a constant", min_value=-1.0, value=1.0)
             if uploaded_file:
                 indecis, samples = multiplySignals(uploaded_file, constant)
@@ -146,12 +142,9 @@ def main():
                 if comparingFile and samples and indecis:
                     SignalSamplesAreEqual(comparingFile, indecis, samples)
 
-
         # Display for Square button
         elif st.session_state["button_pressed"] == "button_4":
-            uploaded_file = st.file_uploader(
-                "Upload the signal txt file", type="txt"
-            )
+            uploaded_file = st.file_uploader("Upload the signal txt file", type="txt")
             if uploaded_file:
                 indecis, samples = squareSignals(uploaded_file)
             comparingFile = st.file_uploader(
@@ -297,26 +290,27 @@ def squareSignals(uploaded_file):
     # Read the file
     indices, amplitudes = readSignal(uploaded_file)
     # Square each amplitude
-    squaredAmplitudes = [amp ** 2 for amp in amplitudes]
+    squaredAmplitudes = [amp**2 for amp in amplitudes]
     draw(indices, squaredAmplitudes)
     return indices, squaredAmplitudes
 
 
 def normalizeSignal0(signalFile):
     indices, signal = readSignal(signalFile)
-    max_value = max(np.abs(signal))
-    normalized_signal = list(x / max_value for x in signal)
+    max_value = max(signal)
+    min_v = min(signal)
+    normalized_signal = list((x - min_v) / (max_value - min_v) for x in signal)
     draw(indices, normalized_signal)
-    return normalized_signal
+    return indices, normalized_signal
 
 
 def normalizeSignal1(signalFile):
     indices, signal = readSignal(signalFile)
     min_val = min(signal)
     max_val = max(signal)
-    signal = list((i - min_val) / (max_val - min_val) for i in signal)
+    signal = list((i - min_val) / (max_val - min_val) * 2 - 1 for i in signal)
     draw(indices, signal)
-    return signal
+    return indices, signal
 
 
 def accumulate(signalFile):
@@ -324,11 +318,11 @@ def accumulate(signalFile):
     for i in range(len(signal) - 1):
         signal[i + 1] += signal[i]
     draw(indices, signal)
-    return signal
+    return indices, signal
 
 
 def SignalSamplesAreEqual(compareFile, indices, samples):
-    expected_indices,expected_samples = readSignal(compareFile)
+    expected_indices, expected_samples = readSignal(compareFile)
 
     if len(expected_samples) != len(samples):
         "Test case failed, your signal have different length from the expected one"
@@ -340,5 +334,31 @@ def SignalSamplesAreEqual(compareFile, indices, samples):
             "Test case failed, your signal have different values from the expected one"
             return
     "Test case passed successfully"
+
+
+def quantize(noOfLevels, samples):
+    minValue = np.min(samples)
+    maxValue = np.max(samples)
+    delta = (maxValue - minValue) / noOfLevels
+    levelsOfSamples = []
+    quantizedValues = []
+    minmax = []
+    midpoints = []
+    encodedLevels = []
+    encodedLevelsOfSamples = []
+    quantizationErrors = []
+    for n in range(noOfLevels):
+        minmax.append((minValue + delta * n, minValue + delta * (n + 1)))
+        midpoints.append((minmax[n][0] + minmax[n][1]) / 2)
+        encodedLevels.append(bin(n)[2:].zfill(int(np.ceil(np.log2(noOfLevels)))))
+    for s in samples:
+        for n in range(noOfLevels):
+            if s >= minmax[n][0] and s <= minmax[n][1]:
+                levelsOfSamples.append(n + 1)
+                encodedLevelsOfSamples.append(encodedLevels[n])
+                quantizedValues.append(midpoints[n])
+                quantizationErrors.append(midpoints[n] - s)
+    return levelsOfSamples, encodedLevelsOfSamples, quantizedValues, quantizationErrors
+
 
 main()
