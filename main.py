@@ -2,16 +2,17 @@ import plotly.graph_objects as go
 import numpy as np
 import streamlit as st
 
+from signals.task3.QuanTest1 import QuantizationTest1
+
 
 def main():
-
     # Main page
     st.title("Digital Signal Processing")
 
     st.sidebar.title("Menu")
     menu = st.sidebar.selectbox(
         "Select an option",
-        ["Arithmetic Operations", "Signal Reading", "Signal Generation"],
+        ["Arithmetic Operations", "Signal Reading", "Signal Generation", "Quantization"],
         index=None,
     )
 
@@ -51,6 +52,43 @@ def main():
                     sinFlag, amplitude, analogFreq, samplingFreq, phaseShift
                 )
                 draw(indices1, values1)
+
+        # Choose your inputs and quantize the samples
+    elif menu == "Quantization":
+        st.header("Quantization")
+
+        uploaded_file = st.file_uploader("Upload a signal txt file", type="txt")
+
+        quant_type = st.radio("Quantization Type", ["Levels", "Bits"])
+        no_of_levels = st.number_input("Number of Levels:", min_value=1, value=2) if quant_type == "Levels" else (
+                1 << st.number_input("Bits:", min_value=1, value=1))
+
+        show_interval_index = st.checkbox("Interval Index", value=True)
+        show_encoded = st.checkbox("Encoded", value=True)
+        show_quantized = st.checkbox("Quantized", value=True)
+        show_error = st.checkbox("Error", value=True)
+
+        if st.button("Quantize Signal"):
+            if uploaded_file is not None:
+                indices, amplitudes = readSignal(uploaded_file)
+                interval_index, encoded, quantized, error = quantize(no_of_levels, amplitudes)
+
+                # Display chosen outputs
+                if show_interval_index:
+                    st.write("Interval Index:", interval_index)
+                if show_encoded:
+                    st.write("Encoded Signal:", encoded)
+                if show_quantized:
+                    st.write("Quantized Signal:", quantized)
+                if show_error:
+                    st.write("Quantization Error:", error)
+
+                if show_quantized or show_error:
+                    draw_quantization(indices, amplitudes, quantized, error, show_error)
+
+                comparingFile = st.file_uploader("Upload the output txt file", type="txt")
+                if comparingFile and encoded and quantized:
+                    QuantizationTest1(comparingFile, encoded, quantized)
 
     elif menu == "Arithmetic Operations":
 
@@ -194,7 +232,7 @@ def readSignal(uploaded_file):
 
     indices = []
     amplitudes = []
-    for line in file_content[3 : 3 + nOfSamples]:
+    for line in file_content[3: 3 + nOfSamples]:
         values = line.strip().split(" ")
         indices.append(int(values[0]))
         amplitudes.append(float(values[1]))
@@ -203,7 +241,6 @@ def readSignal(uploaded_file):
 
 
 def draw(indices, amplitudes):
-
     fig_cont = go.Figure()
     fig_cont.add_trace(
         go.Scatter(x=indices, y=amplitudes, mode="lines", name="Continuous Signal")
@@ -290,7 +327,7 @@ def squareSignals(uploaded_file):
     # Read the file
     indices, amplitudes = readSignal(uploaded_file)
     # Square each amplitude
-    squaredAmplitudes = [amp**2 for amp in amplitudes]
+    squaredAmplitudes = [amp ** 2 for amp in amplitudes]
     draw(indices, squaredAmplitudes)
     return indices, squaredAmplitudes
 
@@ -340,25 +377,43 @@ def quantize(noOfLevels, samples):
     minValue = np.min(samples)
     maxValue = np.max(samples)
     delta = (maxValue - minValue) / noOfLevels
-    levelsOfSamples = []
+    interval_index = []
     quantizedValues = []
-    minmax = []
-    midpoints = []
-    encodedLevels = []
-    encodedLevelsOfSamples = []
     quantizationErrors = []
-    for n in range(noOfLevels):
-        minmax.append((minValue + delta * n, minValue + delta * (n + 1)))
-        midpoints.append((minmax[n][0] + minmax[n][1]) / 2)
-        encodedLevels.append(bin(n)[2:].zfill(int(np.ceil(np.log2(noOfLevels)))))
-    for s in samples:
-        for n in range(noOfLevels):
-            if s >= minmax[n][0] and s <= minmax[n][1]:
-                levelsOfSamples.append(n + 1)
-                encodedLevelsOfSamples.append(encodedLevels[n])
-                quantizedValues.append(midpoints[n])
-                quantizationErrors.append(midpoints[n] - s)
-    return levelsOfSamples, encodedLevelsOfSamples, quantizedValues, quantizationErrors
+    encodedLevels = []
+
+    # Quantization
+    for sample in samples:
+        quantized_level = int((sample - minValue) / delta)
+        quantized_level = min(quantized_level, noOfLevels - 1)  # Avoid overflow
+        quantized_value = minValue + quantized_level * delta + delta / 2
+
+        # Rounding to three decimal places
+        interval_index.append(quantized_level + 1)
+        quantizedValues.append(round(quantized_value, 3))
+        quantizationErrors.append(round(quantized_value - sample, 3))
+        encodedLevels.append(f"{quantized_level:0{int(np.ceil(np.log2(noOfLevels)))}b}")
+
+    return interval_index, encodedLevels, quantizedValues, quantizationErrors
+
+
+def draw_quantization(indices, original, quantized, error, show_error):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=indices, y=original, mode="lines", name="Original Signal"))
+    fig.add_trace(go.Scatter(x=indices, y=quantized, mode="lines", name="Quantized Signal"))
+
+    if show_error:
+        fig.add_trace(go.Scatter(x=indices, y=error, mode="lines", name="Quantization Error"))
+
+    fig.update_layout(
+        title="Quantized Signal and Quantization Error",
+        xaxis_title="Index",
+        yaxis_title="Amplitude",
+        width=1000,
+        height=500,
+    )
+
+    st.plotly_chart(fig)
 
 
 main()
