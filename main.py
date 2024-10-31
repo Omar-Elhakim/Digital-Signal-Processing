@@ -2,14 +2,13 @@ import streamlit as st
 
 from functions import *
 
-
 # Main page
 st.title("Digital Signal Processing")
 
 st.sidebar.title("Menu")
 menu = st.sidebar.selectbox(
     "Select an option",
-    ["Arithmetic Operations", "Signal Reading", "Signal Generation", "Quantization"],
+    ["Arithmetic Operations", "Signal Reading", "Signal Generation", "Quantization", "Frequency Domain"],
     index=None,
 )
 
@@ -95,6 +94,24 @@ elif menu == "Quantization":
                 quantized,
                 error,
             )
+
+elif menu == "Frequency Domain":
+    st.header("Frequency Domain")
+    uploaded_file = st.file_uploader("Upload a signal txt file", type="txt")
+
+    check = st.radio("Choose Transform:", (0, 1), format_func=lambda x: "DFT" if x == 0 else "IDFT"
+                     )
+
+    if st.button("Perform Transform"):
+
+        if check == 0:
+            indices, amplitudes = readSignal(0, uploaded_file)
+            amp, angle = FourierTransform(check, amplitudes)
+            amp
+            angle
+
+        # Hakim: Add the second condition code for the IDTF
+        # else:
 
 elif menu == "Arithmetic Operations":
 

@@ -300,3 +300,32 @@ def QuantizationTest2(
             )
             return
     st.write("QuantizationTest2 Test case passed successfully")
+
+
+def FourierTransform(check, samples):
+    N = len(samples)
+
+    # DFT
+    if check == 0:
+        amplitude = []
+        angle = []
+        for k in range(N):
+            real_part = 0
+            imag_part = 0
+            for n in range(N):
+                exponent = (2 * np.pi * k * n) / N
+                real_part += samples[n] * np.cos(exponent)
+                imag_part -= samples[n] * np.sin(exponent)
+
+            amplitude.append(np.sqrt((real_part*real_part)+(imag_part*imag_part)))
+            angle.append(np.arctan2(imag_part, real_part))
+
+        return amplitude, angle
+
+    # Hakim: Add the second condition code for the IDTF
+    # IDFT
+    elif check == 1:
+        frequency = []
+
+
+        return frequency
