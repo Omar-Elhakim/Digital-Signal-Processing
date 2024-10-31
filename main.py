@@ -107,6 +107,7 @@ elif menu == "Frequency Domain":
         if check == 0:
             indices, amplitudes = readSignal(0, uploaded_file)
             amp, angle = FourierTransform(check, amplitudes)
+            draw(indices,amp)
             amp
             angle
 
