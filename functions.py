@@ -14,7 +14,7 @@ def readSignal(binF, uploaded_file):
     amplitudes = []
     for line in file_content[3 : 3 + nOfSamples]:
         values = line.strip().split(" ")
-        indices.append(int(values[0]) if not binF else values[0])
+        indices.append(float(values[0]) if not binF else values[0])
         amplitudes.append(float(values[1]))
 
     return indices, amplitudes
@@ -302,7 +302,7 @@ def QuantizationTest2(
     st.write("QuantizationTest2 Test case passed successfully")
 
 
-def FourierTransform(check, samples):
+def FourierTransform(check, indices, samples, samplingFrequency):
     N = len(samples)
 
     # DFT
@@ -317,15 +317,25 @@ def FourierTransform(check, samples):
                 real_part += samples[n] * np.cos(exponent)
                 imag_part -= samples[n] * np.sin(exponent)
 
-            amplitude.append(np.sqrt((real_part*real_part)+(imag_part*imag_part)))
-            angle.append(np.arctan2(imag_part, real_part))
+            amplitude.append(np.sqrt((real_part * real_part) + (imag_part * imag_part)))
+            angle.append(np.degrees(np.arctan2(imag_part, real_part)))
+        omega = (2 * np.pi) / (N / samplingFrequency)
+        newIndices = [omega * i for i in range(1, N + 1)]
+        return amplitude, angle, newIndices
 
-        return amplitude, angle
-
-    # Hakim: Add the second condition code for the IDTF
-    # IDFT
     elif check == 1:
-        frequency = []
+        frequencies = []
+        for n in range(N):
+            real_part = 0
+            imag_part = 0
+            for k in range(N):
+                real_amplitude = indices[k] * np.cos(samples[k])
+                imag_amplitude = indices[k] * np.sin(samples[k])
 
+                exponent = (2 * np.pi * k * n) / N
+                real_part += real_amplitude * np.cos(exponent) - imag_amplitude * np.sin(exponent)
+                imag_part += real_amplitude * np.sin(exponent) + imag_amplitude * np.cos(exponent)
 
-        return frequency
+            frequencies.append(round((real_part + imag_part) / N))
+        st.write(frequencies)
+        return frequencies
