@@ -339,3 +339,19 @@ def FourierTransform(check, indices, samples, samplingFrequency):
             frequencies.append(round((real_part + imag_part) / N))
         st.write(frequencies)
         return frequencies
+
+def DCT(signal,m):
+    N = len(signal)
+    
+    y = []
+    
+    for k in range(N):
+        sum = 0
+        for n in range(1, N+1):
+            sum += signal[n-1] * np.cos(np.pi * (2 * (n-1) - 1) * (2 * k - 1) / (4 * N))
+        
+        y.append(np.sqrt(2 / N) * sum)
+    
+    with open("DCT_Output.txt", "w") as file:
+        for value in y[:m]:
+            file.write(f"{value}\n")
