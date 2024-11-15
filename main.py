@@ -123,13 +123,10 @@ elif menu == "Frequency Domain":
             )
             draw(newIndices, amp)
             draw(newIndices, angles)
-            # amp
-            # angles
+            amp
+            angles
         else:
             FourierTransform(1, indices, amplitudes, 0)
-
-        # Hakim: Add the second condition code for the IDFT
-        # else:
 
 elif menu == "Arithmetic Operations":
 

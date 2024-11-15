@@ -318,7 +318,7 @@ def FourierTransform(check, indices, samples, samplingFrequency):
                 imag_part -= samples[n] * np.sin(exponent)
 
             amplitude.append(np.sqrt((real_part * real_part) + (imag_part * imag_part)))
-            angle.append(np.degrees(np.arctan2(imag_part, real_part)))
+            angle.append(np.arctan2(imag_part, real_part))
         omega = (2 * np.pi) / (N / samplingFrequency)
         newIndices = [omega * i for i in range(1, N + 1)]
         return amplitude, angle, newIndices
