@@ -108,18 +108,22 @@ elif menu == "Frequency Domain":
     uploaded_file = st.file_uploader("Upload a signal txt file", type="txt")
 
     check = st.radio(
-        "Choose Transform:", (0, 1), format_func=lambda x: "DFT" if x == 0 else "IDFT"
+        "Choose Transform:", (0, 1, 2), format_func=lambda x: "DFT" if x == 0 else "IDFT" if x == 1 else "DCT"
     )
     if uploaded_file:
         indices, amplitudes = readSignal(0, uploaded_file)
-    if check == 0:
+
+    if check == 0:  # DFT requires sampling frequency
         samplingFrequency = st.number_input(
             "Enter sampling frequency in Hz", min_value=1
         )
+    elif check == 2:  # DCT
+        m = st.number_input("Enter number of coefficients :", value=0, step=1)
+        x = DCT(amplitudes, m)
 
     if st.button("Perform Transform"):
 
-        if check == 0:
+        if check == 0:  # DFT
             amp, angles, newIndices = FourierTransform(
                 check, indices, amplitudes, samplingFrequency
             )
@@ -127,8 +131,18 @@ elif menu == "Frequency Domain":
             draw(newIndices, angles)
             amp
             angles
-        else:
+
+        elif check == 1:  # IDFT
             FourierTransform(1, indices, amplitudes, 0)
+
+        elif check == 2:  # DCT
+            x
+
+    if check == 2:  # DCT
+        comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+        if comparingFile:
+            SignalSamplesAreEqual(comparingFile, indices, x)
+
 
 elif menu == "Time Domain":
     st.header("Time Domain Operations")

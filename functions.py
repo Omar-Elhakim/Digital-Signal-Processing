@@ -351,10 +351,12 @@ def DCT(signal,m):
             sum += signal[n-1] * np.cos(np.pi * (2 * (n-1) - 1) * (2 * k - 1) / (4 * N))
         
         y.append(np.sqrt(2 / N) * sum)
-    
+
     with open("DCT_Output.txt", "w") as file:
         for value in y[:m]:
             file.write(f"{value}\n")
+
+    return y
 
 
 def delay_advance_signal(indices, amplitudes, k):
