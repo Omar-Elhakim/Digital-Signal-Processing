@@ -14,6 +14,8 @@ menu = st.sidebar.selectbox(
         "Signal Generation",
         "Quantization",
         "Frequency Domain",
+        "Time Domain",
+        "Sharpening"
     ],
     index=None,
 )
@@ -127,6 +129,59 @@ elif menu == "Frequency Domain":
             angles
         else:
             FourierTransform(1, indices, amplitudes, 0)
+
+elif menu == "Time Domain":
+    st.header("Time Domain Operations")
+
+    operation = st.selectbox(
+        "Choose Operation",
+        [
+            "Delay/Advance Signal by k Steps",
+            "Fold Signal",
+            "Delay/Advance Folded Signal by k Steps",
+        ],
+    )
+
+    uploaded_file = st.file_uploader("Upload a signal txt file", type="txt")
+    if uploaded_file:
+        indices, amplitudes = readSignal(0, uploaded_file)
+        indices_folded, amplitudes_folded = fold_signal(indices, amplitudes)
+        amplitudes_shifted = None
+        indices_shifted = None
+
+        if operation == "Delay/Advance Signal by k Steps":
+            k = st.number_input("Enter k (positive for delay, negative for advance):", value=0, step=1)
+            if st.button("Apply"):
+                indices_shifted, amplitudes_shifted = delay_advance_signal(indices, amplitudes, k)
+                draw(indices_shifted, amplitudes_shifted)
+
+        elif operation == "Fold Signal":
+            if st.button("Apply"):
+                draw(indices_folded, amplitudes_folded)
+
+            comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+            if comparingFile and amplitudes_folded and indices_folded:
+                SignalSamplesAreEqual(comparingFile, indices_folded, amplitudes_folded)
+
+        elif operation == "Delay/Advance Folded Signal by k Steps":
+            k = st.number_input("Enter k (positive for delay, negative for advance):", value=0, step=1)
+            if st.button("Apply"):
+                indices_shifted, amplitudes_shifted = delay_advance_signal(indices_folded, amplitudes_folded, k)
+                draw(indices_shifted, amplitudes_shifted)
+
+            comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+            if comparingFile:
+                if indices_shifted is None or amplitudes_shifted is None:
+                    st.error("Please perform the required operation first to generate a shifted signal.")
+                else:
+                    Shift_Fold_Signal(
+                        f"signals/task5/Shifting_and_folding/Shifting and Folding/{comparingFile.name}",
+                        indices_shifted,
+                        amplitudes_shifted
+                    )
+
+elif menu == "Sharpening":
+    DerivativeSignal()
 
 elif menu == "Arithmetic Operations":
 
