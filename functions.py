@@ -842,3 +842,22 @@ def ConvTest(Your_indices, Your_samples):
             )
             return
     st.write("Conv Test case passed successfully")
+
+
+def norm_cross_correlation(signal1, signal2):
+    N = len(signal1)
+    result = []
+    for j in range(N):
+        sum = 0
+        firstSum = 0
+        secondSum = 0
+
+        for n in range(N):
+            sum += signal1[n] * signal2[j + n - N]
+            firstSum += signal1[n] ** 2
+            secondSum += signal2[n] ** 2
+
+        numerator = sum / N
+        denominator = ((firstSum * secondSum) ** 0.5) / N
+        result.append(numerator / denominator)
+    return result

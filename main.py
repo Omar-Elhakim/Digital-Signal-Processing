@@ -18,6 +18,7 @@ menu = st.sidebar.selectbox(
         "Sharpening",
         "smoothing",
         "Convolution",
+        "Correlation",
     ],
     index=None,
 )
@@ -153,7 +154,7 @@ elif menu == "Frequency Domain":
         amp, angles, newIndices = FourierTransform(
             check, indices, amplitudes, samplingFrequency
         )
-        amp[0]=0
+        amp[0] = 0
         draw(newIndices, amp)
         draw(newIndices, angles)
         amp
@@ -279,6 +280,25 @@ elif menu == "Convolution":
             st.write(convolved_indices, convolved_amplitudes)
             ConvTest(convolved_indices, convolved_amplitudes)
 
+elif menu == "Correlation":
+    st.header("Normalized Cross-Correlation")
+    uploaded_file1 = st.file_uploader(
+        "Upload the first signal txt file", type="txt", key="file1"
+    )
+    uploaded_file2 = st.file_uploader(
+        "Upload the second signal txt file", type="txt", key="file2"
+    )
+
+    if uploaded_file1 and uploaded_file2:
+        indices1, amplitudes1 = readSignal(0, uploaded_file1)
+        indices2, amplitudes2 = readSignal(0, uploaded_file2)
+        result = norm_cross_correlation(amplitudes1, amplitudes2)
+        st.write(result)
+
+        comparingFile = st.file_uploader(
+            "Upload the signal compare txt file", type="txt"
+        )
+        SignalSamplesAreEqual(comparingFile, indices1, result)
 elif menu == "Arithmetic Operations":
 
     if "button_pressed" not in st.session_state:
