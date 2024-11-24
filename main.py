@@ -17,7 +17,7 @@ menu = st.sidebar.selectbox(
         "Time Domain",
         "Sharpening",
         "smoothing",
-        "Convolution"
+        "Convolution",
     ],
     index=None,
 )
@@ -110,7 +110,9 @@ elif menu == "Frequency Domain":
     uploaded_file = st.file_uploader("Upload a signal txt file", type="txt")
 
     check = st.radio(
-        "Choose Transform:", (0, 1, 2), format_func=lambda x: "DFT" if x == 0 else "IDFT" if x == 1 else "DCT"
+        "Choose Transform:",
+        (0, 1, 2),
+        format_func=lambda x: "DFT" if x == 0 else "IDFT" if x == 1 else "DCT",
     )
     if uploaded_file:
         indices, amplitudes = readSignal(0, uploaded_file)
@@ -141,7 +143,9 @@ elif menu == "Frequency Domain":
             x
 
     if check == 2:  # DCT
-        comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+        comparingFile = st.file_uploader(
+            "Upload the signal compare txt file", type="txt"
+        )
         if comparingFile:
             SignalSamplesAreEqual(comparingFile, indices, x)
 
@@ -155,7 +159,7 @@ elif menu == "Time Domain":
             "Delay/Advance Signal by k Steps",
             "Fold Signal",
             "Delay/Advance Folded Signal by k Steps",
-            "remove DC"
+            "remove DC",
         ],
     )
 
@@ -167,34 +171,48 @@ elif menu == "Time Domain":
         indices_shifted = None
 
         if operation == "Delay/Advance Signal by k Steps":
-            k = st.number_input("Enter k (positive for delay, negative for advance):", value=0, step=1)
+            k = st.number_input(
+                "Enter k (positive for delay, negative for advance):", value=0, step=1
+            )
             if st.button("Apply"):
-                indices_shifted, amplitudes_shifted = delay_advance_signal(indices, amplitudes, k)
+                indices_shifted, amplitudes_shifted = delay_advance_signal(
+                    indices, amplitudes, k
+                )
                 draw(indices_shifted, amplitudes_shifted)
 
         elif operation == "Fold Signal":
             if st.button("Apply"):
                 draw(indices_folded, amplitudes_folded)
 
-            comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+            comparingFile = st.file_uploader(
+                "Upload the signal compare txt file", type="txt"
+            )
             if comparingFile and amplitudes_folded and indices_folded:
                 SignalSamplesAreEqual(comparingFile, indices_folded, amplitudes_folded)
 
         elif operation == "Delay/Advance Folded Signal by k Steps":
-            k = st.number_input("Enter k (positive for delay, negative for advance):", value=0, step=1)
+            k = st.number_input(
+                "Enter k (positive for delay, negative for advance):", value=0, step=1
+            )
             if st.button("Apply"):
-                indices_shifted, amplitudes_shifted = delay_advance_signal(indices_folded, amplitudes_folded, k)
+                indices_shifted, amplitudes_shifted = delay_advance_signal(
+                    indices_folded, amplitudes_folded, k
+                )
                 draw(indices_shifted, amplitudes_shifted)
 
-            comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+            comparingFile = st.file_uploader(
+                "Upload the signal compare txt file", type="txt"
+            )
             if comparingFile:
                 if indices_shifted is None or amplitudes_shifted is None:
-                    st.error("Please perform the required operation first to generate a shifted signal.")
+                    st.error(
+                        "Please perform the required operation first to generate a shifted signal."
+                    )
                 else:
                     Shift_Fold_Signal(
                         f"signals/task5/Shifting_and_folding/Shifting and Folding/{comparingFile.name}",
                         indices_shifted,
-                        amplitudes_shifted
+                        amplitudes_shifted,
                     )
 
         elif operation == "remove DC":
@@ -202,7 +220,9 @@ elif menu == "Time Domain":
             dc_removed_amplitudes = [amp - mean_amplitude for amp in amplitudes]
             draw(indices, dc_removed_amplitudes)
             st.write(dc_removed_amplitudes)
-            comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+            comparingFile = st.file_uploader(
+                "Upload the signal compare txt file", type="txt"
+            )
             if comparingFile and dc_removed_amplitudes and indices:
                 SignalSamplesAreEqual(comparingFile, indices, dc_removed_amplitudes)
 
@@ -223,21 +243,29 @@ if menu == "smoothing":
         if st.button("Apply Smoothing"):
             draw(indices, smoothed_amplitudes)
             st.write("Smoothed Signal (Moving Average):", smoothed_amplitudes)
-        comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+        comparingFile = st.file_uploader(
+            "Upload the signal compare txt file", type="txt"
+        )
         if comparingFile and smoothed_amplitudes and indices:
             SignalSamplesAreEqual(comparingFile, indices, smoothed_amplitudes)
 
 elif menu == "Convolution":
     st.header("Signal Convolution")
-    uploaded_file1 = st.file_uploader("Upload the first signal txt file", type="txt", key="file1")
-    uploaded_file2 = st.file_uploader("Upload the second signal txt file", type="txt", key="file2")
+    uploaded_file1 = st.file_uploader(
+        "Upload the first signal txt file", type="txt", key="file1"
+    )
+    uploaded_file2 = st.file_uploader(
+        "Upload the second signal txt file", type="txt", key="file2"
+    )
 
     if uploaded_file1 and uploaded_file2:
         indices1, amplitudes1 = readSignal(0, uploaded_file1)
         indices2, amplitudes2 = readSignal(0, uploaded_file2)
 
         if st.button("Perform Convolution"):
-            convolved_amplitudes, convolved_indices = convolve_signals(indices1, amplitudes1, indices2, amplitudes2)
+            convolved_amplitudes, convolved_indices = convolve_signals(
+                indices1, amplitudes1, indices2, amplitudes2
+            )
             draw(convolved_indices, convolved_amplitudes)
             st.write(convolved_indices, convolved_amplitudes)
             ConvTest(convolved_indices, convolved_amplitudes)

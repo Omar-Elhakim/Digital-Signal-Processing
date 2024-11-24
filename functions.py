@@ -12,7 +12,7 @@ def readSignal(binF, uploaded_file):
 
     indices = []
     amplitudes = []
-    for line in file_content[3: 3 + nOfSamples]:
+    for line in file_content[3 : 3 + nOfSamples]:
         values = line.strip().split(" ")
         indices.append(float(values[0]) if not binF else values[0])
         amplitudes.append(float(values[1]))
@@ -107,7 +107,7 @@ def squareSignals(uploaded_file):
     # Read the file
     indices, amplitudes = readSignal(0, uploaded_file)
     # Square each amplitude
-    squaredAmplitudes = [amp ** 2 for amp in amplitudes]
+    squaredAmplitudes = [amp**2 for amp in amplitudes]
     draw(indices, squaredAmplitudes)
     return indices, squaredAmplitudes
 
@@ -142,13 +142,17 @@ def SignalSamplesAreEqual(compareFile, indices, samples):
     expected_indices, expected_samples = readSignal(0, compareFile)
 
     if len(expected_samples) != len(samples):
-        st.write("Test case failed, your signal have different length from the expected one")
+        st.write(
+            "Test case failed, your signal have different length from the expected one"
+        )
         return
     for i in range(len(expected_samples)):
         if abs(samples[i] - expected_samples[i]) < 0.01:
             continue
         else:
-            st.write("Test case failed, your signal have different values from the expected one")
+            st.write(
+                "Test case failed, your signal have different values from the expected one"
+            )
             return
     st.write("Test case passed successfully")
 
@@ -205,7 +209,7 @@ def draw_quantization(indices, original, quantized, error, show_error):
 def QuantizationTest1(compareFile, Your_EncodedValues, Your_QuantizedValues):
     expectedEncodedValues, expectedQuantizedValues = readSignal(1, compareFile)
     if (len(Your_EncodedValues) != len(expectedEncodedValues)) or (
-            len(Your_QuantizedValues) != len(expectedQuantizedValues)
+        len(Your_QuantizedValues) != len(expectedQuantizedValues)
     ):
         st.write(
             "QuantizationTest1 Test case failed, your signal have different length from the expected one"
@@ -229,11 +233,11 @@ def QuantizationTest1(compareFile, Your_EncodedValues, Your_QuantizedValues):
 
 
 def QuantizationTest2(
-        file_name,
-        Your_IntervalIndices,
-        Your_EncodedValues,
-        Your_QuantizedValues,
-        Your_SampledError,
+    file_name,
+    Your_IntervalIndices,
+    Your_EncodedValues,
+    Your_QuantizedValues,
+    Your_SampledError,
 ):
     expectedIntervalIndices = []
     expectedEncodedValues = []
@@ -261,10 +265,10 @@ def QuantizationTest2(
             else:
                 break
     if (
-            len(Your_IntervalIndices) != len(expectedIntervalIndices)
-            or len(Your_EncodedValues) != len(expectedEncodedValues)
-            or len(Your_QuantizedValues) != len(expectedQuantizedValues)
-            or len(Your_SampledError) != len(expectedSampledError)
+        len(Your_IntervalIndices) != len(expectedIntervalIndices)
+        or len(Your_EncodedValues) != len(expectedEncodedValues)
+        or len(Your_QuantizedValues) != len(expectedQuantizedValues)
+        or len(Your_SampledError) != len(expectedSampledError)
     ):
         st.write(
             "QuantizationTest2 Test case failed, your signal have different length from the expected one"
@@ -333,8 +337,12 @@ def FourierTransform(check, indices, samples, samplingFrequency):
                 imag_amplitude = indices[k] * np.sin(samples[k])
 
                 exponent = (2 * np.pi * k * n) / N
-                real_part += real_amplitude * np.cos(exponent) - imag_amplitude * np.sin(exponent)
-                imag_part += real_amplitude * np.sin(exponent) + imag_amplitude * np.cos(exponent)
+                real_part += real_amplitude * np.cos(
+                    exponent
+                ) - imag_amplitude * np.sin(exponent)
+                imag_part += real_amplitude * np.sin(
+                    exponent
+                ) + imag_amplitude * np.cos(exponent)
 
             frequencies.append(round((real_part + imag_part) / N))
         st.write(frequencies)
@@ -349,7 +357,9 @@ def DCT(signal, m):
     for k in range(N):
         sum = 0
         for n in range(1, N + 1):
-            sum += signal[n - 1] * np.cos(np.pi * (2 * (n - 1) - 1) * (2 * k - 1) / (4 * N))
+            sum += signal[n - 1] * np.cos(
+                np.pi * (2 * (n - 1) - 1) * (2 * k - 1) / (4 * N)
+            )
 
         y.append(np.sqrt(2 / N) * sum)
 
@@ -374,7 +384,7 @@ def fold_signal(indices, amplitudes):
 def Shift_Fold_Signal(file_name, Your_indices, Your_samples):
     expected_indices = []
     expected_samples = []
-    with open(file_name, 'r') as f:
+    with open(file_name, "r") as f:
         line = f.readline()
         line = f.readline()
         line = f.readline()
@@ -382,8 +392,8 @@ def Shift_Fold_Signal(file_name, Your_indices, Your_samples):
         while line:
             # process line
             L = line.strip()
-            if len(L.split(' ')) == 2:
-                L = line.split(' ')
+            if len(L.split(" ")) == 2:
+                L = line.split(" ")
                 V1 = int(L[0])
                 V2 = float(L[1])
                 expected_indices.append(V1)
@@ -392,43 +402,347 @@ def Shift_Fold_Signal(file_name, Your_indices, Your_samples):
             else:
                 break
     st.write("Current Output Test file is: ")
-    if (len(expected_samples) != len(Your_samples)) and (len(expected_indices) != len(Your_indices)):
-        st.write("Shift_Fold_Signal Test case failed, your signal have different length from the expected one")
+    if (len(expected_samples) != len(Your_samples)) and (
+        len(expected_indices) != len(Your_indices)
+    ):
+        st.write(
+            "Shift_Fold_Signal Test case failed, your signal have different length from the expected one"
+        )
         return
     for i in range(len(Your_indices)):
-        if (Your_indices[i] != expected_indices[i]):
-            st.write("Shift_Fold_Signal Test case failed, your signal have different indicies from the expected one")
+        if Your_indices[i] != expected_indices[i]:
+            st.write(
+                "Shift_Fold_Signal Test case failed, your signal have different indicies from the expected one"
+            )
             return
     for i in range(len(expected_samples)):
         if abs(Your_samples[i] - expected_samples[i]) < 0.01:
             continue
         else:
-            st.write("Shift_Fold_Signal Test case failed, your signal have different values from the expected one")
+            st.write(
+                "Shift_Fold_Signal Test case failed, your signal have different values from the expected one"
+            )
             return
     st.write("Shift_Fold_Signal Test case passed successfully")
 
 
 def DerivativeSignal():
-    InputSignal = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
-                   28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52,
-                   53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77,
-                   78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100]
-    expectedOutput_first = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                            1, 1, 1, 1, 1, 1]
-    expectedOutput_second = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0]
+    InputSignal = [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+    ]
+    expectedOutput_first = [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+    ]
+    expectedOutput_second = [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ]
 
     """
     Write your Code here:
     Start
     """
-    FirstDrev = [InputSignal[n] - InputSignal[n - 1] if n else 0 for n in range(1, len(InputSignal))]
-    SecondDrev = [InputSignal[n + 1] - 2 * InputSignal[n] + InputSignal[n - 1] if n else 0 for n in
-                  range(1, len(InputSignal) - 1)]
+    FirstDrev = [
+        InputSignal[n] - InputSignal[n - 1] if n else 0
+        for n in range(1, len(InputSignal))
+    ]
+    SecondDrev = [
+        InputSignal[n + 1] - 2 * InputSignal[n] + InputSignal[n - 1] if n else 0
+        for n in range(1, len(InputSignal) - 1)
+    ]
 
     """
     End
@@ -437,7 +751,9 @@ def DerivativeSignal():
     """
     Testing your Code
     """
-    if ((len(FirstDrev) != len(expectedOutput_first)) or (len(SecondDrev) != len(expectedOutput_second))):
+    if (len(FirstDrev) != len(expectedOutput_first)) or (
+        len(SecondDrev) != len(expectedOutput_second)
+    ):
         st.write("mismatch in length")
         return
     first = second = True
@@ -455,7 +771,7 @@ def DerivativeSignal():
             second = False
             st.write("2nd derivative wrong")
             return
-    if (first and second):
+    if first and second:
         st.write("Derivative Test case passed successfully")
     else:
         st.write("Derivative Test case failed")
@@ -472,7 +788,9 @@ def compute_moving_average(signal, window_size):
     return smoothed_signal
 
 
-def convolve_signals(signal1_indices, signal1_samples, signal2_indices, signal2_samples):
+def convolve_signals(
+    signal1_indices, signal1_samples, signal2_indices, signal2_samples
+):
     n = len(signal1_samples)
     m = len(signal2_samples)
     convolved_signal = [0] * (n + m - 1)
@@ -481,7 +799,10 @@ def convolve_signals(signal1_indices, signal1_samples, signal2_indices, signal2_
         for j in range(max(0, i - m + 1), min(n, i + 1)):
             convolved_signal[i] += signal1_samples[j] * signal2_samples[i - j]
 
-    convolved_indices = np.arange(signal1_indices[0] + signal2_indices[0], signal1_indices[-1] + signal2_indices[-1] + 1)
+    convolved_indices = np.arange(
+        signal1_indices[0] + signal2_indices[0],
+        signal1_indices[-1] + signal2_indices[-1] + 1,
+    )
 
     return convolved_signal, convolved_indices
 
@@ -499,17 +820,25 @@ def ConvTest(Your_indices, Your_samples):
     expected_indices = [-2, -1, 0, 1, 2, 3, 4, 5, 6]
     expected_samples = [1, 1, -1, 0, 0, 3, 3, 2, 1]
 
-    if (len(expected_samples) != len(Your_samples)) and (len(expected_indices) != len(Your_indices)):
-        st.write("Conv Test case failed, your signal have different length from the expected one")
+    if (len(expected_samples) != len(Your_samples)) and (
+        len(expected_indices) != len(Your_indices)
+    ):
+        st.write(
+            "Conv Test case failed, your signal have different length from the expected one"
+        )
         return
     for i in range(len(Your_indices)):
-        if (Your_indices[i] != expected_indices[i]):
-            st.write("Conv Test case failed, your signal have different indicies from the expected one")
+        if Your_indices[i] != expected_indices[i]:
+            st.write(
+                "Conv Test case failed, your signal have different indicies from the expected one"
+            )
             return
     for i in range(len(expected_samples)):
         if abs(Your_samples[i] - expected_samples[i]) < 0.01:
             continue
         else:
-            st.write("Conv Test case failed, your signal have different values from the expected one")
+            st.write(
+                "Conv Test case failed, your signal have different values from the expected one"
+            )
             return
     st.write("Conv Test case passed successfully")
