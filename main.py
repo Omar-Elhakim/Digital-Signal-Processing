@@ -15,7 +15,9 @@ menu = st.sidebar.selectbox(
         "Quantization",
         "Frequency Domain",
         "Time Domain",
-        "Sharpening"
+        "Sharpening",
+        "smoothing",
+        "Convolution"
     ],
     index=None,
 )
@@ -153,6 +155,7 @@ elif menu == "Time Domain":
             "Delay/Advance Signal by k Steps",
             "Fold Signal",
             "Delay/Advance Folded Signal by k Steps",
+            "remove DC"
         ],
     )
 
@@ -194,8 +197,50 @@ elif menu == "Time Domain":
                         amplitudes_shifted
                     )
 
+        elif operation == "remove DC":
+            mean_amplitude = sum(amplitudes) / len(amplitudes)
+            dc_removed_amplitudes = [amp - mean_amplitude for amp in amplitudes]
+            draw(indices, dc_removed_amplitudes)
+            st.write(dc_removed_amplitudes)
+            comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+            if comparingFile and dc_removed_amplitudes and indices:
+                SignalSamplesAreEqual(comparingFile, indices, dc_removed_amplitudes)
+
 elif menu == "Sharpening":
     DerivativeSignal()
+
+if menu == "smoothing":
+    st.header("Smoothing")
+
+    uploaded_file = st.file_uploader("Upload a signal txt file", type="txt")
+    if uploaded_file is not None:
+        indices, amplitudes = readSignal(0, uploaded_file)
+        window_size = st.number_input(
+            "Enter the window size for moving average:", min_value=1, value=3
+        )
+        smoothed_amplitudes = compute_moving_average(amplitudes, window_size)
+
+        if st.button("Apply Smoothing"):
+            draw(indices, smoothed_amplitudes)
+            st.write("Smoothed Signal (Moving Average):", smoothed_amplitudes)
+        comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+        if comparingFile and smoothed_amplitudes and indices:
+            SignalSamplesAreEqual(comparingFile, indices, smoothed_amplitudes)
+
+elif menu == "Convolution":
+    st.header("Signal Convolution")
+    uploaded_file1 = st.file_uploader("Upload the first signal txt file", type="txt", key="file1")
+    uploaded_file2 = st.file_uploader("Upload the second signal txt file", type="txt", key="file2")
+
+    if uploaded_file1 and uploaded_file2:
+        indices1, amplitudes1 = readSignal(0, uploaded_file1)
+        indices2, amplitudes2 = readSignal(0, uploaded_file2)
+
+        if st.button("Perform Convolution"):
+            convolved_amplitudes, convolved_indices = convolve_signals(indices1, amplitudes1, indices2, amplitudes2)
+            draw(convolved_indices, convolved_amplitudes)
+            st.write(convolved_indices, convolved_amplitudes)
+            ConvTest(convolved_indices, convolved_amplitudes)
 
 elif menu == "Arithmetic Operations":
 
