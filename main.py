@@ -149,6 +149,15 @@ elif menu == "Frequency Domain":
         if comparingFile:
             SignalSamplesAreEqual(comparingFile, indices, x)
 
+    if st.button("Remove DC component"):  # DFT
+        amp, angles, newIndices = FourierTransform(
+            check, indices, amplitudes, samplingFrequency
+        )
+        amp[0]=0
+        draw(newIndices, amp)
+        draw(newIndices, angles)
+        amp
+        angles
 
 elif menu == "Time Domain":
     st.header("Time Domain Operations")
@@ -229,7 +238,7 @@ elif menu == "Time Domain":
 elif menu == "Sharpening":
     DerivativeSignal()
 
-if menu == "smoothing":
+elif menu == "smoothing":
     st.header("Smoothing")
 
     uploaded_file = st.file_uploader("Upload a signal txt file", type="txt")
