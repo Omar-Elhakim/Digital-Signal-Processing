@@ -14,7 +14,7 @@ def readSignal(binF, uploaded_file):
     indices = []
     amplitudes = []
     for line in file_content[3 : 3 + nOfSamples]:
-        values = line.strip().split(" ")
+        values = line.strip().split()
         indices.append(float(values[0]) if not binF else values[0])
         amplitudes.append(float(values[1]))
 
