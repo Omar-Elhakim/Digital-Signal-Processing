@@ -171,6 +171,7 @@ elif menu == "Time Domain":
             "Fold Signal",
             "Delay/Advance Folded Signal by k Steps",
             "remove DC",
+            "Resampling",
         ],
     )
 
@@ -236,6 +237,60 @@ elif menu == "Time Domain":
             )
             if comparingFile and dc_removed_amplitudes and indices:
                 SignalSamplesAreEqual(comparingFile, indices, dc_removed_amplitudes)
+
+        elif operation == "Resampling":
+            M = st.number_input(
+                "Enter M (decimation factor):", value=0, step=1
+            )
+            L = st.number_input(
+                "Enter L (interpolation factor):", value=0, step=1
+            )
+            if M == 0 and L != 0:
+                newSz = len(amplitudes) * L
+                upsamples = [0] * newSz
+                upsamplesIndices = [i for i in range(newSz)]
+
+                for i in range(len(amplitudes)):
+                    upsamples[i * L] = amplitudes[i]
+
+                d = FIR_Filter("Low_Pass", 8000, 50, 1500, 500)
+                ad, id = convolve_signals([0], d, upsamplesIndices, upsamples)
+                ad = list(filter(lambda x: x != 0, ad))
+                ad
+                id
+                draw(id, ad)
+                comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+                SignalSamplesAreEqual(comparingFile, id, ad)
+
+            elif M != 0 and L == 0:
+                d = FIR_Filter("Low_Pass", 8000, 50, 1500, 500)
+                ad, id = convolve_signals([0], d, indices, amplitudes)
+                indices = [i for i in range(int(len(ad) / M))]
+                samples = ad[::M]
+                samples
+                indices
+                draw(indices, samples)
+                comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+                SignalSamplesAreEqual(comparingFile, indices, samples)
+
+            else:
+                newSz = len(amplitudes) * L
+                upsamples = [0] * newSz
+                upsamplesIndices = [i for i in range(newSz)]
+
+                for i in range(len(amplitudes)):
+                    upsamples[i * L] = amplitudes[i]
+
+                d = FIR_Filter("Low_Pass", 8000, 50, 1500, 500)
+                ad, id = convolve_signals([0], d, upsamplesIndices, upsamples)
+                ad = list(filter(lambda x: x != 0, ad))
+                indices = [i for i in range(int(len(ad) / M))]
+                samples = ad[::M]
+                samples
+                indices
+                draw(indices, samples)
+                comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+                SignalSamplesAreEqual(comparingFile, indices, samples)
 
 elif menu == "Sharpening":
     DerivativeSignal()
