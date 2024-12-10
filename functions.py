@@ -966,16 +966,18 @@ def FIR_Filter(filterType, Fs, StopBandAttenuation, F, TransitionWidth):
         f2 += TransitionWidth / 2
         f1 /= Fs
         f2 /= Fs
+        F = f1, f2
     elif filterType == "Band_Stop":
         f1, f2 = F
         f1 += TransitionWidth / 2
         f2 -= TransitionWidth / 2
         f1 /= Fs
         f2 /= Fs
+        F = f1, f2
 
     h = []
     for n in range(ceil(N / 2)):
-        h.append(FilterType[filterType]((f1, f2), n) * WindowType[window](n, N))
+        h.append(FilterType[filterType](F, n) * WindowType[window](n, N))
     hReversed = h.copy()
     hReversed.reverse()
     hReversed.pop()

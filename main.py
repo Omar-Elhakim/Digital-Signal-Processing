@@ -14,6 +14,7 @@ menu = st.sidebar.selectbox(
         "Signal Generation",
         "Quantization",
         "Frequency Domain",
+        "FIR Filters",
         "Time Domain",
         "Sharpening",
         "smoothing",
@@ -299,6 +300,45 @@ elif menu == "Correlation":
             "Upload the signal compare txt file", type="txt"
         )
         SignalSamplesAreEqual(comparingFile, indices1, result)
+
+elif menu == "FIR Filters":
+    st.header("Filtering")
+    menu2 = st.selectbox(
+        "Select a Filter ",
+        [
+            "Low_Pass",
+            "High_Pass",
+            "Band_Pass",
+            "Band_Stop",
+        ],
+        index=None,
+    )
+    uploaded_file = st.file_uploader("Upload a signal txt file", type="txt")
+    if uploaded_file is not None:
+        indices, amplitudes = readSignal(0, uploaded_file)
+    h = None
+    fs = st.number_input("Sampling Freq (Hz)", value=1)
+    stopA = st.number_input("Stopband attenuation (dB)", value=1)
+    transitionBand = st.number_input("Transition Band (Hz)", value=1)
+
+    if menu2 in ["Low_Pass", "High_Pass"]:
+        fc = st.number_input("Cutoff Freq (Hz)", value=1)
+        h = FIR_Filter(menu2, fs, stopA, fc, transitionBand)
+
+    elif menu2 in ["Band_Pass", "Band_Stop"]:
+        f1 = st.number_input("F1 (Hz)", value=1)
+        f2 = st.number_input("F2 (Hz)", value=1)
+        h = FIR_Filter(menu2, fs, stopA, (f1, f2), transitionBand)
+
+    if h:
+        st.write(h)
+        amp, ind = convolve_signals([0], h, indices, amplitudes)
+
+    comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
+
+    SignalSamplesAreEqual(comparingFile, ind, amp)
+
+
 elif menu == "Arithmetic Operations":
 
     if "button_pressed" not in st.session_state:
