@@ -1,6 +1,7 @@
 import plotly.graph_objects as go
 import numpy as np
 import streamlit as st
+from math import ceil
 
 
 def readSignal(binF, uploaded_file):
@@ -861,3 +862,121 @@ def norm_cross_correlation(signal1, signal2):
         denominator = ((firstSum * secondSum) ** 0.5) / N
         result.append(numerator / denominator)
     return result
+
+
+def Low_Pass(fc, n):
+    if n == 0:
+        return 2 * fc
+    omega_c = 2 * np.pi * fc
+    return 2 * fc * (np.sin(n * omega_c) / (n * omega_c))
+
+
+def High_Pass(fc, n):
+    if n == 0:
+        return 1 - (2 * fc)
+    omega_c = 2 * np.pi * fc
+    return -2 * fc * (np.sin(n * omega_c) / (n * omega_c))
+
+
+def Band_Pass(f, n):
+    if n == 0:
+        return 2 * (f[1] - f[0])
+    omega_1 = 2 * np.pi * f[0]
+    omega_2 = 2 * np.pi * f[1]
+    term1 = 2 * f[1] * (np.sin(n * omega_2) / (n * omega_2))
+    term2 = 2 * f[0] * (np.sin(n * omega_1) / (n * omega_1))
+    return term1 - term2
+
+
+def Band_Stop(f, n):
+    if n == 0:
+        return 1 - 2 * (f[1] - f[0])
+    omega_1 = 2 * np.pi * f[0]
+    omega_2 = 2 * np.pi * f[1]
+    term1 = 2 * f[0] * (np.sin(n * omega_1) / (n * omega_1))
+    term2 = 2 * f[1] * (np.sin(n * omega_2) / (n * omega_2))
+    return term1 - term2
+
+
+FilterType = {
+    "Low_Pass": Low_Pass,
+    "High_Pass": High_Pass,
+    "Band_Pass": Band_Pass,
+    "Band_Stop": Band_Stop,
+}
+
+
+def RectangularWindow():
+    return 1
+
+
+def HanningWindow(n, N):
+    if n == 0:
+        return 1
+    return 0.5 + 0.5 * np.cos((2 * np.pi * n) / N)
+
+
+def HammingWindow(n, N):
+    if n == 0:
+        return 1
+    return 0.54 + 0.46 * np.cos((2 * np.pi * n) / N)
+
+
+def BlackmanWindow(n, N):
+    if n == 0:
+        return 1
+    term2 = 0.5 * np.cos((2 * np.pi * n) / (N - 1))
+    term3 = 0.08 * np.cos((4 * np.pi * n) / (N - 1))
+    return 0.42 + term2 + term3
+
+
+WindowType = {
+    "RectangularWindow": RectangularWindow,
+    "HanningWindow": HanningWindow,
+    "HammingWindow": HammingWindow,
+    "BlackmanWindow": BlackmanWindow,
+}
+
+
+def FIR_Filter(filterType, Fs, StopBandAttenuation, F, TransitionWidth):
+    if StopBandAttenuation <= 21:
+        window = "RectangularWindow"
+        N = 0.9 / (TransitionWidth / Fs)
+    elif StopBandAttenuation <= 44:
+        window = "HanningWindow"
+        N = 3.1 / (TransitionWidth / Fs)
+    elif StopBandAttenuation <= 53:
+        window = "HammingWindow"
+        N = 3.3 / (TransitionWidth / Fs)
+    elif StopBandAttenuation <= 74:
+        window = "BlackmanWindow"
+        N = 5.5 / (TransitionWidth / Fs)
+    N = ceil(N)
+    if N % 2 == 0:
+        N += 1
+    if filterType == "Low_Pass":
+        F += TransitionWidth / 2
+        F /= Fs
+    elif filterType == "High_Pass":
+        F -= TransitionWidth / 2
+        F /= Fs
+    elif filterType == "Band_Pass":
+        f1, f2 = F
+        f1 -= TransitionWidth / 2
+        f2 += TransitionWidth / 2
+        f1 /= Fs
+        f2 /= Fs
+    elif filterType == "Band_Stop":
+        f1, f2 = F
+        f1 += TransitionWidth / 2
+        f2 -= TransitionWidth / 2
+        f1 /= Fs
+        f2 /= Fs
+
+    h = []
+    for n in range(ceil(N / 2)):
+        h.append(FilterType[filterType]((f1, f2), n) * WindowType[window](n, N))
+    hReversed = h.copy()
+    hReversed.reverse()
+    hReversed.pop()
+    return hReversed + h
