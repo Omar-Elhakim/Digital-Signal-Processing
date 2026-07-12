@@ -78,7 +78,9 @@ elif menu == "Quantization":
     show_error = st.checkbox("Error", value=True)
 
     # if st.button("Quantize Signal"):
-    if uploaded_file is not None:
+    if uploaded_file is None:
+        st.info("Upload a signal file to quantize.")
+    else:
         indices, amplitudes = readSignal(0, uploaded_file)
         interval_index, encoded, quantized, error = quantize(no_of_levels, amplitudes)
 
@@ -94,18 +96,18 @@ elif menu == "Quantization":
 
         draw_quantization(indices, amplitudes, quantized, error, 0)
 
-    comparingFile = st.file_uploader("Upload the output txt file", type="txt")
-    if comparingFile and encoded and quantized:
-        if uploaded_file.name == "Quan1_input.txt":
-            QuantizationTest1(comparingFile, encoded, quantized)
-        else:
-            QuantizationTest2(
-                f"signals/task3/{comparingFile.name}",
-                interval_index,
-                encoded,
-                quantized,
-                error,
-            )
+        comparingFile = st.file_uploader("Upload the output txt file", type="txt")
+        if comparingFile and encoded and quantized:
+            if uploaded_file.name == "Quan1_input.txt":
+                QuantizationTest1(comparingFile, encoded, quantized)
+            else:
+                QuantizationTest2(
+                    f"signals/task3/{comparingFile.name}",
+                    interval_index,
+                    encoded,
+                    quantized,
+                    error,
+                )
 
 elif menu == "Frequency Domain":
     st.header("Frequency Domain")
@@ -116,50 +118,56 @@ elif menu == "Frequency Domain":
         (0, 1, 2),
         format_func=lambda x: "DFT" if x == 0 else "IDFT" if x == 1 else "DCT",
     )
-    if uploaded_file:
+    if uploaded_file is None:
+        st.info("Upload a signal file to run a transform.")
+    else:
         indices, amplitudes = readSignal(0, uploaded_file)
 
-    if check == 0:  # DFT requires sampling frequency
-        samplingFrequency = st.number_input(
-            "Enter sampling frequency in Hz", min_value=1
-        )
-    elif check == 2:  # DCT
-        m = st.number_input("Enter number of coefficients :", value=0, step=1)
-        x = DCT(amplitudes, m)
+        if check == 0:  # DFT requires sampling frequency
+            samplingFrequency = st.number_input(
+                "Enter sampling frequency in Hz", min_value=1
+            )
+        elif check == 2:  # DCT
+            m = st.number_input("Enter number of coefficients :", value=0, step=1)
+            x = DCT(amplitudes, m)
 
-    if st.button("Perform Transform"):
+        if st.button("Perform Transform"):
 
-        if check == 0:  # DFT
+            if check == 0:  # DFT
+                amp, angles, newIndices = FourierTransform(
+                    check, indices, amplitudes, samplingFrequency
+                )
+                draw(newIndices, amp)
+                draw(newIndices, angles)
+                amp
+                angles
+
+            elif check == 1:  # IDFT
+                FourierTransform(1, indices, amplitudes, 0)
+
+            elif check == 2:  # DCT
+                x
+
+        if check == 2:  # DCT
+            if st.button("Save coefficients to DCT_Output.txt"):
+                save_DCT_coefficients(x, m)
+                st.write(f"Saved the first {m} coefficients to DCT_Output.txt")
+
+            comparingFile = st.file_uploader(
+                "Upload the signal compare txt file", type="txt"
+            )
+            if comparingFile:
+                SignalSamplesAreEqual(comparingFile, indices, x)
+
+        if check == 0 and st.button("Remove DC component"):  # DFT
             amp, angles, newIndices = FourierTransform(
                 check, indices, amplitudes, samplingFrequency
             )
+            amp[0] = 0
             draw(newIndices, amp)
             draw(newIndices, angles)
             amp
             angles
-
-        elif check == 1:  # IDFT
-            FourierTransform(1, indices, amplitudes, 0)
-
-        elif check == 2:  # DCT
-            x
-
-    if check == 2:  # DCT
-        comparingFile = st.file_uploader(
-            "Upload the signal compare txt file", type="txt"
-        )
-        if comparingFile:
-            SignalSamplesAreEqual(comparingFile, indices, x)
-
-    if st.button("Remove DC component"):  # DFT
-        amp, angles, newIndices = FourierTransform(
-            check, indices, amplitudes, samplingFrequency
-        )
-        amp[0] = 0
-        draw(newIndices, amp)
-        draw(newIndices, angles)
-        amp
-        angles
 
 elif menu == "Time Domain":
     st.header("Time Domain Operations")
@@ -330,13 +338,15 @@ elif menu == "FIR Filters":
         f2 = st.number_input("F2 (Hz)", value=1)
         h = FIR_Filter(menu2, fs, stopA, (f1, f2), transitionBand)
 
-    if h:
+    if h and uploaded_file is not None:
         st.write(h)
         amp, ind = convolve_signals([0], h, indices, amplitudes)
 
-    comparingFile = st.file_uploader("Upload the signal compare txt file", type="txt")
-
-    SignalSamplesAreEqual(comparingFile, ind, amp)
+        comparingFile = st.file_uploader(
+            "Upload the signal compare txt file", type="txt"
+        )
+        if comparingFile:
+            SignalSamplesAreEqual(comparingFile, ind, amp)
 
 
 elif menu == "Arithmetic Operations":
