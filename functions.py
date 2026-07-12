@@ -356,19 +356,21 @@ def DCT(signal, m):
     y = []
 
     for k in range(N):
-        sum = 0
+        total = 0
         for n in range(1, N + 1):
-            sum += signal[n - 1] * np.cos(
+            total += signal[n - 1] * np.cos(
                 np.pi * (2 * (n - 1) - 1) * (2 * k - 1) / (4 * N)
             )
 
-        y.append(np.sqrt(2 / N) * sum)
-
-    with open("DCT_Output.txt", "w") as file:
-        for value in y[:m]:
-            file.write(f"{value}\n")
+        y.append(np.sqrt(2 / N) * total)
 
     return y
+
+
+def save_DCT_coefficients(coefficients, m):
+    with open("DCT_Output.txt", "w") as file:
+        for value in coefficients[:m]:
+            file.write(f"{value}\n")
 
 
 def delay_advance_signal(indices, amplitudes, k):
@@ -780,12 +782,18 @@ def DerivativeSignal():
 
 
 def compute_moving_average(signal, window_size):
+    if len(signal) < window_size:
+        return []
+
     smoothed_signal = []
-    for i in range(len(signal) - (window_size - 1)):
-        x = 0
-        for j in range(window_size):
-            x += signal[j + i]
-        smoothed_signal.append(x / window_size)
+    # Slide the window by adding the entering sample and dropping the leaving one,
+    # instead of re-summing the whole window at every step.
+    windowSum = sum(signal[:window_size])
+    smoothed_signal.append(windowSum / window_size)
+
+    for i in range(1, len(signal) - (window_size - 1)):
+        windowSum += signal[i + window_size - 1] - signal[i - 1]
+        smoothed_signal.append(windowSum / window_size)
     return smoothed_signal
 
 
@@ -848,18 +856,18 @@ def ConvTest(Your_indices, Your_samples):
 def norm_cross_correlation(signal1, signal2):
     N = len(signal1)
     result = []
+
+    # The normalizing energies do not depend on the lag, so compute them once.
+    firstSum = sum(x**2 for x in signal1)
+    secondSum = sum(x**2 for x in signal2)
+    denominator = ((firstSum * secondSum) ** 0.5) / N
+
     for j in range(N):
-        sum = 0
-        firstSum = 0
-        secondSum = 0
-
+        total = 0
         for n in range(N):
-            sum += signal1[n] * signal2[j + n - N]
-            firstSum += signal1[n] ** 2
-            secondSum += signal2[n] ** 2
+            total += signal1[n] * signal2[j + n - N]
 
-        numerator = sum / N
-        denominator = ((firstSum * secondSum) ** 0.5) / N
+        numerator = total / N
         result.append(numerator / denominator)
     return result
 
@@ -906,7 +914,7 @@ FilterType = {
 }
 
 
-def RectangularWindow():
+def RectangularWindow(n, N):
     return 1
 
 
@@ -951,6 +959,11 @@ def FIR_Filter(filterType, Fs, StopBandAttenuation, F, TransitionWidth):
     elif StopBandAttenuation <= 74:
         window = "BlackmanWindow"
         N = 5.5 / (TransitionWidth / Fs)
+    else:
+        raise ValueError(
+            "Stopband attenuation above 74 dB is not supported: "
+            "no window in the table meets it."
+        )
     N = ceil(N)
     if N % 2 == 0:
         N += 1
