@@ -1,0 +1,19 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+
+# Environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated output
+DCT_Output.txt
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
