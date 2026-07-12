@@ -75,3 +75,7 @@ main.ipynb        Development notebook the implementations were prototyped in
 signals/          Input signals and expected outputs, grouped by task
 requirements.txt
 ```
+
+## License
+
+Released under the [MIT License](LICENSE).
